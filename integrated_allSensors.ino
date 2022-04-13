@@ -92,8 +92,7 @@ void loop() {
   Serial.print(LVL1);
   Serial.print("  ");
   Serial.println(LVL2);
-  int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
-  int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+
   //DHT.read11(dht_apin);
     
   Serial.print("Current humidity = ");
@@ -119,7 +118,13 @@ void loop() {
   //output_value1 = map(output_value1,550,10,0,100);
   
   //Serial.println((String)"A0: "+ soilmoisturepercent0 + " A1: " + soilmoisturepercent1);
-  
+
+//*******************************ACTUATION DOWN HERE***************************//
+  delay(5000); //wait 5 seconds
+// turn on lights!
+  int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
+  int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+// turn on water pumps  
   if(soilmoisturepercent0<20){
     digitalWrite(relayPin0, LOW);
   }
@@ -134,22 +139,20 @@ void loop() {
   }
   
   if (waterLevelInput = 0) {
-  Serial.println("Fill your tank");
-
-  delay(5000); //wait 5 seconds
-
-  display.clearDisplay();
-  display.setTextSize(0.7);
-  display.setCursor(0,0);
-  display.print("Temp = ");
-  display.print(int(t));
-  display.print(" C");
-  display.setCursor(0,13);
-  display.print("Humidity = ");
-  display.print(int(h));
-  display.print(" %");
-  display.display(); 
-}
+    Serial.println("Fill your tank");
+  // display humidity and temp
+    display.clearDisplay();
+    display.setTextSize(0.7);
+    display.setCursor(0,0);
+    display.print("Temp = ");
+    display.print(int(t));
+    display.print(" C");
+    display.setCursor(0,13);
+    display.print("Humidity = ");
+    display.print(int(h));
+    display.print(" %");
+    display.display(); 
+  }
 }
 
 int setCurrentLevel(int current){
