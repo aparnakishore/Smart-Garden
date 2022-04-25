@@ -3,27 +3,31 @@
   #include <Wire.h>
   #include <Adafruit_GFX.h>
   #include <Adafruit_SSD1306.h>
+  #include <ArduinoJson.h>
   Adafruit_SSD1306 display(-1);
   #define DHTPIN 3 // digital Pin 3, humidity sensor
   #define DHTTYPE DHT11
   DHT dht(DHTPIN,DHTTYPE);
-  
+  StaticJsonDocument<200> doc;
+
 //moisture and water pump includes and definition
-  const int AirValue = 620;   //you need to replace this value with Value_1
-  const int WaterValue = 310;  //you need to replace this value with Value_2
+//  const int AirValue = 620;   //you need to replace this value with Value_1
+//  const int WaterValue = 310;  //you need to replace this value with Value_2
+//  String plant1 = ""
+//  String plant2 = ""
   int soilMoistureValue0 = 0;
   int soilMoistureValue1 = 0;
   int waterLevelInput = 0;
   int output_value0;
   int output_value1;
-  int soilmoisturepercent0=0;
-  int soilmoisturepercent1=0;
+//  int soilmoisturepercent0=0;
+//  int soilmoisturepercent1=0;
   int relayPin0 = 52;
   int relayPin1 = 53;
   int soil0 = A0;
   int soil1 = A1;
   int waterPin = A6;
-
+  String message = "{" + (String)"\"action\": \"NOTIFY\",";
 
 //define LED output and light sensor inputs
 //LEDS
@@ -71,7 +75,8 @@ void setup() {
 
 void loop() {
 
-
+  digitalWrite(relayPin0, HIGH);
+  digitalWrite(relayPin1, HIGH);
 //current brightness values
   int current1 = analogRead(light1Pin);
   int current2 = analogRead(light2Pin);
@@ -82,67 +87,125 @@ void loop() {
 // if we want to Read temperature as Fahrenheit (isFahrenheit = true)
 //  float f = dht.readTemperature(true);
 
-  Serial.print(current1);
-  Serial.print("  ");
-  Serial.println(current2);
+//  Serial.print(current1);
+//  Serial.print("  ");
+//  Serial.println(current2);
 
 //set current level for plant 1
   int LVL1 = setCurrentLevel(current1); //set these two with brightness sensor
   int LVL2 = setCurrentLevel(current2); 
-  Serial.print(LVL1);
-  Serial.print("  ");
-  Serial.println(LVL2);
+//  Serial.print(LVL1);
+//  Serial.print("  ");
+//  Serial.println(LVL2);
 
   //DHT.read11(dht_apin);
     
-  Serial.print("Current humidity = ");
-  Serial.print(h);
-  Serial.print("%  ");
-  Serial.print("temperature = ");
-  Serial.print(t); 
-  Serial.println("C  ");
+//  Serial.print("Current humidity = ");
+//  Serial.print(h);
+//  Serial.print("%  ");
+//  Serial.print("temperature = ");
+//  Serial.print(t); 
+//  Serial.println("C  ");
 
 //set moisture and activate pumps
   soilMoistureValue0 = analogRead(soil0);  //put Sensor insert into soil
   soilMoistureValue1 = analogRead(soil1);  //put Sensor insert into soil
   
-  soilmoisturepercent0 = map(soilMoistureValue0, AirValue, WaterValue, 0, 100);
-  soilmoisturepercent1 = map(soilMoistureValue1, AirValue, WaterValue, 0, 100);
+//  soilmoisturepercent0 = map(soilMoistureValue0, 660, 390, 0, 100);
+//  soilmoisturepercent1 = map(soilMoistureValue1, 660, 390, 0, 100); 
+
+//  Serial.println((String)"soilMoistureValue0 - " + soilMoistureValue0); 
+//  Serial.println((String)"soilMoistureValue1 - " + soilMoistureValue1); 
+//  Serial.println((String)"soilmoisturepercent0 - " + soilmoisturepercent0); 
+//  Serial.println((String)"soilmoisturepercent1 - " + soilmoisturepercent1); 
   
   waterLevelInput = analogRead(waterPin); //water level sensor
-  Serial.print("waterLevelInput = ");
-  Serial.println(waterLevelInput); 
- 
-  //output_value0=analogRead(soilMoistureValue0);
-  //output_value1=analogRead(soilMoistureValue1);
-  
-  //output_value0 = map(output_value0,550,10,0,100);
-  //output_value1 = map(output_value1,550,10,0,100);
-  
-  //Serial.println((String)"A0: "+ soilmoisturepercent0 + " A1: " + soilmoisturepercent1);
+  if(waterLevelInput < 25){
+    String message1 = message + "\"message\": \"Fill your tank!\"}";
+//    Serial.println(message1);    
+  }
 
+   if (Serial.available() > 0)
+   {
+    String receivedString = (String)Serial.readStringUntil('\n');
+    DeserializationError error = deserializeJson(doc, receivedString);
+    if (error)
+    {
+      return;
+    }
+   
+    const char *action = doc["action"];
+    if (strcmp(action, "WATER") == 0 ){
+        const char *rackId = doc["rackId"];
+//        Serial.println("before if");
+        if (strcmp(rackId, "0") == 0){
+//          Serial.println("in 0 if");
+          digitalWrite(relayPin0, LOW);
+          delay(5000);
+          digitalWrite(relayPin0, HIGH);
+          }
+        if (strcmp(rackId, "1") == 0){
+          digitalWrite(relayPin1, LOW);
+          delay(5000);
+          digitalWrite(relayPin1, HIGH);
+        }
+      }
+   
+    else if (strcmp(action, "LIGHT") == 0)
+    {
+      const char *state = doc["state"];
+      const char *rackId = doc["rackId"];
+      Serial.println("before if");
+
+      if (strcmp(rackId, "0") == 0){
+        Serial.println("rack 0");
+
+        if (strcmp(state, "ON") == 0)
+        {
+          Serial.println("inside on");
+
+          int on0 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
+        }
+        else
+        {
+          digitalWrite(6, LOW);
+          digitalWrite(7, LOW);
+        }
+    }
+    else if (strcmp(rackId, "1") == 0){
+        if (strcmp(state, "ON") == 0)
+        {
+          int on1 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+        }
+        else
+        {
+          digitalWrite(4, LOW);
+          digitalWrite(5, LOW);
+        }
+    }
+  }
+ }
 //*******************************ACTUATION DOWN HERE***************************//
   delay(5000); //wait 5 seconds
 // turn on lights!
-  int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
-  int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
-// turn on water pumps  
-  if(soilmoisturepercent0<20){
-    digitalWrite(relayPin0, LOW);
-  }
-  else{
-    digitalWrite(relayPin0, HIGH);
-  }
-  if(soilmoisturepercent1<20){
-    digitalWrite(relayPin1, LOW);
-  }
-  else{
-    digitalWrite(relayPin1, HIGH);
-  }
+//  int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
+//  int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+
   
-  if (waterLevelInput = 0) {
-    Serial.println("Fill your tank");
-}
+// turn on water pumps  
+//  if(soilmoisturepercent0<20){
+//    digitalWrite(relayPin0, LOW);
+//  }
+//  else{
+//    digitalWrite(relayPin0, HIGH);
+//  }
+//  if(soilmoisturepercent1<20){
+//    digitalWrite(relayPin1, LOW);
+//  }
+//  else{
+//    digitalWrite(relayPin1, HIGH);
+//  }
+  
   // display humidity and temp
     display.clearDisplay();
     display.setTextSize(0.7);
@@ -172,9 +235,9 @@ int setCurrentLevel(int current){
 int turnOnLights(int pin1, int pin2, int goal, int current){
 //turn on lights if there's a difference between what we have and what we want
   int diff = goal - current;
-  Serial.print(goal);
-  Serial.print("  ");
-  Serial.println(diff);
+//  Serial.print(goal);
+//  Serial.print("  ");
+//  Serial.println(diff);
 //thresholding max and min
   if(diff < 0) diff = 0;
   if(diff > 2 ) diff = 2;
