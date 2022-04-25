@@ -41,9 +41,9 @@
   int currentLVL1 = 0; //what we're at
   int currentLVL2 = 0;
 //define brightness ranges (these we just kinda need to map 
-  int medMax = 850;
+  int medMax = 720;
   int lowMax = 550;
-  int lowMin = 300;
+  int lowMin = 350;
 
   
 
@@ -110,7 +110,9 @@ void loop() {
   soilmoisturepercent1 = map(soilMoistureValue1, AirValue, WaterValue, 0, 100);
   
   waterLevelInput = analogRead(waterPin); //water level sensor
-  
+  Serial.print("waterLevelInput = ");
+  Serial.println(waterLevelInput); 
+ 
   //output_value0=analogRead(soilMoistureValue0);
   //output_value1=analogRead(soilMoistureValue1);
   
@@ -140,6 +142,7 @@ void loop() {
   
   if (waterLevelInput = 0) {
     Serial.println("Fill your tank");
+}
   // display humidity and temp
     display.clearDisplay();
     display.setTextSize(0.7);
@@ -152,7 +155,6 @@ void loop() {
     display.print(int(h));
     display.print(" %");
     display.display(); 
-  }
 }
 
 int setCurrentLevel(int current){
