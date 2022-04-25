@@ -11,7 +11,7 @@
   StaticJsonDocument<200> doc;
   StaticJsonDocument<200> out;
   StaticJsonDocument<200> notify;
-
+  boolean ldrMode = false;
 
 //moisture and water pump includes and definition
 //  const int AirValue = 620;   //you need to replace this value with Value_1
@@ -181,22 +181,28 @@ void loop() {
           Serial.println("inside on");
 
           int on0 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
+          ldrMode = true;
         }
         else
         {
           digitalWrite(6, LOW);
           digitalWrite(7, LOW);
+          ldrMode = false;
         }
     }
     else if (rackId==1){
+      Serial.println(state);
         if (strcmp(state, "ON") == 0)
         {
+          Serial.println("aksjfbkajsbkjasbvkjasbvjkabvdkjabdvkjab88888888888888888888");
           int on1 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+          ldrMode = true;
         }
         else
         {
           digitalWrite(4, LOW);
           digitalWrite(5, LOW);
+          ldrMode = false;
         }
     }
   }
@@ -240,8 +246,12 @@ void loop() {
 //*******************************ACTUATION DOWN HERE***************************//
   delay(5000); //wait 5 seconds
 // turn on lights!
-//  int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
-//  int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+  if (!ldrMode)
+  {
+    int on1 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);
+    int on2 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);
+  }
+
 // turn on water pumps
 //  if(soilmoisturepercent0<20){
 //    digitalWrite(relayPin0, LOW);
