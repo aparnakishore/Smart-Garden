@@ -1,6 +1,10 @@
 const int AirValue = 620;   //you need to replace this value with Value_1
 const int WaterValue = 310;  //you need to replace this value with Value_2
 
+char angle_str[10]; 
+int idx; 
+
+
 int soilMoistureValue0 = 0;
 int soilMoistureValue1 = 0;
 
@@ -24,6 +28,10 @@ void setup() {
   pinMode(waterLevelInput,INPUT);
   Serial.println("Reading sensor..");
   delay(2000);
+  Serial.begin(9600);
+  Serial.print("start\r\n");
+
+    idx = 0;
 }
 
 void loop() {
@@ -44,9 +52,11 @@ waterLevelInput = analogRead(A2); //water level sensor
 //Serial.println((String)"A0: "+ soilmoisturepercent0 + " A1: " + soilmoisturepercent1);
 
 if(soilmoisturepercent0<20){
+//turn on pump
   digitalWrite(relayPin0, LOW);
 }
 else{
+//turn off pump
   digitalWrite(relayPin0, HIGH);
 }
 if(soilmoisturepercent1<20){
@@ -59,6 +69,19 @@ else{
 if (waterLevelInput = 0) {
 Serial.println("Fill your tank");
 //Notification
+
+
+if (Serial.available() > 0) {
+    angle_str[idx] = Serial.read();
+    if (angle_str[idx] == LF) {
+        Serial.print("Received new angle: ");
+        angle_str[idx-1] = 0;
+        Serial.println(angle_str);
+        idx = -1;
+        }
+    idx++;
+    }
+
 }
 delay(1000);
 }
