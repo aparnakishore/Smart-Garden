@@ -11,7 +11,7 @@
   StaticJsonDocument<200> doc;
   StaticJsonDocument<200> out;
   StaticJsonDocument<200> notify;
-  boolean manual = false;
+  bool manual = false;
   const unsigned long eventInterval = 3600000;
   unsigned long previousTime = 0;
 
