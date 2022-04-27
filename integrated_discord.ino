@@ -184,7 +184,9 @@ void loop() {
         {
           Serial.println("inside on");
          // ldrMode = true;
-         int on0 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);        
+         digitalWrite(6, HIGH);
+         digitalWrite(7, HIGH);
+//         int on0 = turnOnLights(p1LED1, p1LED2, goalLVL1, LVL1);        
          currentTime = millis();
          manual = true;
          if (currentTime - previousTime >= eventInterval) {
@@ -211,7 +213,9 @@ void loop() {
         {
           Serial.println("inside on");
          // ldrMode = true;
-         int on1 = turnOnLights(p1LED1, p1LED2, goalLVL2, LVL2);        
+         digitalWrite(4, HIGH);
+         digitalWrite(5, HIGH);
+//         int on1 = turnOnLights(p2LED1, p2LED2, goalLVL2, LVL2);        
          currentTime = millis();
          manual = true;
          if (currentTime - previousTime >= eventInterval) {
@@ -301,7 +305,7 @@ void loop() {
   else{
     digitalWrite(relayPin0, HIGH);
   }
-  if(soilMoistureValue0>MedMax){
+  if(soilMoistureValue1>MedMin){
     digitalWrite(relayPin1, LOW);
   }
   else{
@@ -398,7 +402,7 @@ String getLight(int l){
   }
   else
   {
-    return "Invalid Input";
+    return "High";
   }
 
 }
